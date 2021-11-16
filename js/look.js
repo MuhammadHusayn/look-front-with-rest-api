@@ -1,20 +1,23 @@
-const hostName = 'http://192.168.96.151:8000'
+const hostName = 'http://192.168.192.151:8000'
 const customersList = document.querySelector('.customers-list')
 const ordersList = document.querySelector('.orders-list')
 const clientId = document.querySelector('#clientId')
 const userHeader = document.querySelector('#userHeader')
+const userAddForm = document.querySelector('#userAdd')
+const usernameInput = document.querySelector('#usernameInput')
+const telephoneInput = document.querySelector('#telephoneInput')
 
-
-function createElements (...array) {
-	return array.map( el => {
+function createElements(...array) {
+	return array.map(el => {
 		return document.createElement(el)
-	} )
+	})
 }
 
-async function renderUsers () {
+async function renderUsers() {
 	const response = await fetch(hostName + '/users')
 	const users = await response.json()
-	for(let user of users) {
+	customersList.innerHTML = null
+	for (let user of users) {
 		const [li, span, a] = createElements('li', 'span', 'a')
 
 		li.className = 'customer-item'
@@ -37,12 +40,11 @@ async function renderUsers () {
 	}
 }
 
-
-async function renderOrders (userId) {
+async function renderOrders(userId) {
 	const response = await fetch(hostName + '/orders/' + userId)
 	const orders = await response.json()
 	ordersList.innerHTML = null
-	for(let order of orders) {
+	for (let order of orders) {
 		const [li, img, div, foodName, foodCount] = createElements('li', 'img', 'div', 'span', 'span')
 
 		li.className = 'order-item'
@@ -51,13 +53,41 @@ async function renderOrders (userId) {
 
 		img.src = hostName + order.food.food_img_link
 
-		foodName.textContent = order.food.food_name 
+		foodName.textContent = order.food.food_name
 		foodCount.textContent = order.count
 
-		div.append(foodName, foodCount) 
+		div.append(foodName, foodCount)
 		li.append(img, div)
 		ordersList.append(li)
 	}
+}
+
+userAddForm.onsubmit = async event => {
+	event.preventDefault()
+	if (!usernameInput.value || !telephoneInput.value) return
+
+	try {
+
+		const response = await fetch(hostName + '/users', {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				username: usernameInput.value,
+				phone: telephoneInput.value,
+			})
+		})
+
+		usernameInput.value = null
+		telephoneInput.value = null
+
+		renderUsers()
+
+	} catch (error) {
+		alert(error.message)
+	}
+
 }
 
 renderUsers()
