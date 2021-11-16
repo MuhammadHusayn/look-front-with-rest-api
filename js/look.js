@@ -1,4 +1,4 @@
-const hostName = 'http://192.168.192.151:8000'
+const hostName = 'https://look-backend-rest.herokuapp.com'
 const customersList = document.querySelector('.customers-list')
 const ordersList = document.querySelector('.orders-list')
 const clientId = document.querySelector('#clientId')
