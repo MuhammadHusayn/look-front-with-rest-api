@@ -6,6 +6,7 @@ const userHeader = document.querySelector('#userHeader')
 const userAddForm = document.querySelector('#userAdd')
 const usernameInput = document.querySelector('#usernameInput')
 const telephoneInput = document.querySelector('#telephoneInput')
+const foodsSelect = document.querySelector('#foodsSelect')
 
 function createElements(...array) {
 	return array.map(el => {
@@ -62,6 +63,19 @@ async function renderOrders(userId) {
 	}
 }
 
+async function renderFoods(userId) {
+	const response = await fetch(hostName + '/foods')
+	const foods = await response.json()
+
+	for (let food of foods) {
+		const [option] = createElements('option')
+		option.value = food.food_id
+		option.textContent = food.food_name
+
+		foodsSelect.append(option)
+	}
+}
+
 userAddForm.onsubmit = async event => {
 	event.preventDefault()
 	if (!usernameInput.value || !telephoneInput.value) return
@@ -91,3 +105,4 @@ userAddForm.onsubmit = async event => {
 }
 
 renderUsers()
+renderFoods()
