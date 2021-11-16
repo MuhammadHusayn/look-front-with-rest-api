@@ -134,7 +134,5 @@ foodsForm.onsubmit = async event => {
 
 }
 
-setInterval( () => {
-	renderUsers()
-}, 1000 )
+renderUsers()
 renderFoods()
