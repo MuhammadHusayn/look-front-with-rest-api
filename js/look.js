@@ -1,4 +1,3 @@
-const hostName = 'https://look-backend-rest.herokuapp.com'
 const customersList = document.querySelector('.customers-list')
 const ordersList = document.querySelector('.orders-list')
 const clientId = document.querySelector('#clientId')
@@ -10,15 +9,9 @@ const foodsSelect = document.querySelector('#foodsSelect')
 const foodsForm = document.querySelector('#foodsForm')
 const foodsCount = document.querySelector('#foodsCount')
 
-function createElements(...array) {
-	return array.map(el => {
-		return document.createElement(el)
-	})
-}
-
 async function renderUsers() {
-	const response = await fetch(hostName + '/users')
-	const users = await response.json()
+	const { users } = await axios(GET_USERS)
+
 	customersList.innerHTML = null
 	for (let user of users) {
 		const [li, span, a] = createElements('li', 'span', 'a')
@@ -27,25 +20,25 @@ async function renderUsers() {
 		span.className = 'customer-name'
 		a.className = 'customer-phone'
 
-		span.textContent = user.first_name
-		a.textContent = '+' + user.telephone
+		span.textContent = user.username
+		a.textContent = '+' + user.contact
 
-		a.setAttribute('href', 'tel:' + '+' + user.telephone)
+		a.setAttribute('href', 'tel:' + '+' + user.contact)
 
 		li.append(span, a)
 		customersList.append(li)
 
 		li.onclick = () => {
-			renderOrders(user.user_id)
-			clientId.textContent = user.user_id
-			userHeader.textContent = user.first_name
+			renderOrders(user.userId)
+			clientId.textContent = user.userId
+			userHeader.textContent = user.username
 		}
 	}
 }
 
 async function renderOrders(userId) {
-	const response = await fetch(hostName + '/orders/' + userId)
-	const orders = await response.json()
+	const { orders } = await axios(GET_ORDERS, { userId })
+
 	ordersList.innerHTML = null
 	for (let order of orders) {
 		const [li, img, div, foodName, foodCount] = createElements('li', 'img', 'div', 'span', 'span')
@@ -54,9 +47,9 @@ async function renderOrders(userId) {
 		foodName.className = 'order-name'
 		foodCount.className = 'order-count'
 
-		img.src = hostName + order.food.food_img_link
+		img.src = hostNameForImage + order.food.foodImg.replace('.', '')
 
-		foodName.textContent = order.food.food_name
+		foodName.textContent = order.food.foodName
 		foodCount.textContent = order.count
 
 		div.append(foodName, foodCount)
@@ -66,13 +59,12 @@ async function renderOrders(userId) {
 }
 
 async function renderFoods(userId) {
-	const response = await fetch(hostName + '/foods')
-	const foods = await response.json()
+	const { foods } = await axios(GET_FOODS)
 
 	for (let food of foods) {
 		const [option] = createElements('option')
-		option.value = food.food_id
-		option.textContent = food.food_name
+		option.value = food.foodId
+		option.textContent = food.foodName
 
 		foodsSelect.append(option)
 	}
@@ -84,15 +76,9 @@ userAddForm.onsubmit = async event => {
 
 	try {
 
-		const response = await fetch(hostName + '/users', {
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				username: usernameInput.value,
-				phone: telephoneInput.value,
-			})
+		const response = await axios(ADD_USER, {
+			username: usernameInput.value,
+			contact: telephoneInput.value,
 		})
 
 		usernameInput.value = null
@@ -111,16 +97,10 @@ foodsForm.onsubmit = async event => {
 	if (!clientId.textContent || !foodsCount.value) return
 	try {
 
-		const response = await fetch(hostName + '/orders', {
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				userId: clientId.textContent,
-				foodId: foodsSelect.value,
-				count: foodsCount.value,
-			})
+		const response = await axios(ADD_ORDER, {
+			userId: clientId.textContent,
+			foodId: foodsSelect.value,
+			count: foodsCount.value,
 		})
 
 		foodsSelect.value = 1
